@@ -12,8 +12,8 @@ It checks that a choice was made. It does not judge whether the alt text is good
 
 ## Tests
 
-- `node --test wp-plugins/lfw-alt-text/tests/*.test.mjs` runs the editor rule and publish lock logic (`assets/rules.js`).
-- `wp-plugins/lfw-alt-text/test.sh` runs a throwaway WordPress 6.8 in Docker and checks save sanitization, capability checks, the server-side publish rule, overrides, settings, the REST field and the CLI. `KEEP=1` leaves it running on port 8094 (admin / admin, editor ed / ed).
+- `node --test tests/*.test.mjs` runs the editor rule and publish lock logic (`assets/rules.js`).
+- `test.sh` runs a throwaway WordPress 6.8 in Docker and checks save sanitization, capability checks, the server-side publish rule, overrides, settings, the REST field and the CLI. `KEEP=1` leaves it running on port 8094 (admin / admin, editor ed / ed).
 
 ## How the publish lock works (WordPress 6.8)
 
