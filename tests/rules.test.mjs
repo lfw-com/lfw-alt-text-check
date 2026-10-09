@@ -1,5 +1,5 @@
 // Tests for the editor rule and lock logic (assets/rules.js).
-//   node --test wp-plugins/lfw-alt-text/tests/*.test.mjs
+//   node --test tests/*.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import "../assets/rules.js";

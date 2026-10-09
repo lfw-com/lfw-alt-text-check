@@ -2,9 +2,9 @@
 # Throwaway WordPress 6.8 in Docker: activate LFW Alt Text and check the save
 # sanitization, the Media Library status, the server-side publish rule for REST
 # saves, overrides, settings and `wp lfw-alt-text audit`. Tears down after.
-#   wp-plugins/lfw-alt-text/test.sh          run the checks
-#   KEEP=1 wp-plugins/lfw-alt-text/test.sh   leave WordPress running on :8094 (admin / admin)
-# The editor rule and lock logic have their own tests: node --test wp-plugins/lfw-alt-text/tests/*.test.mjs
+#   test.sh          run the checks
+#   KEEP=1 test.sh   leave WordPress running on :8094 (admin / admin)
+# The editor rule and lock logic have their own tests: node --test tests/*.test.mjs
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; PORT="${PORT:-8094}"; FAILED=0
 cleanup(){ [ -n "${KEEP:-}" ] || { docker rm -f lfwalt-db lfwalt-wp >/dev/null 2>&1 || true; docker network rm lfwalt >/dev/null 2>&1 || true; }; }
