@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import "../assets/rules.js";
 
-const R = globalThis.lfwAltTextRules;
+const R = globalThis.lfwAltTextCheckRules;
 const img = (attrs, clientId = "a") => ({
   name: "core/image",
   clientId,

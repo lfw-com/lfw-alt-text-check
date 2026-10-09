@@ -1,5 +1,5 @@
 /**
- * LFW Alt Text in the block editor. No build step.
+ * LFW Alt Text Check in the block editor. No build step.
  * 1. Adds lfwAltReason / lfwAltNote to the Image, Cover and Media & Text blocks.
  * 2. A block settings panel to record why an image has no alt text.
  * 3. An "Alt text" panel in the pre-publish checks and the post settings that
@@ -16,17 +16,17 @@
   const __ = wp.i18n.__,
     _n = wp.i18n._n,
     sprintf = wp.i18n.sprintf;
-  const R = window.lfwAltTextRules;
-  const cfg = window.lfwAltText || { mode: "off", canOverride: false, noteMax: 200 };
+  const R = window.lfwAltTextCheckRules;
+  const cfg = window.lfwAltTextCheck || { mode: "off", canOverride: false, noteMax: 200 };
   const ALT_KEY = { "core/image": "alt", "core/cover": "alt", "core/media-text": "mediaAlt" };
-  const LOCK = "lfw-alt-text";
-  const NOTICE = "lfw-alt-text-lock";
-  const D = "lfw-alt-text";
+  const LOCK = "lfw-alt-text-check";
+  const NOTICE = "lfw-alt-text-check-lock";
+  const D = "lfw-alt-text-check";
 
   // 1. The attributes. Registered whatever the mode, so a saved choice is never dropped.
   wp.hooks.addFilter(
     "blocks.registerBlockType",
-    "lfw-alt-text/attributes",
+    "lfw-alt-text-check/attributes",
     function (settings, name) {
       if (!ALT_KEY[name]) return settings;
       return Object.assign({}, settings, {
@@ -117,8 +117,8 @@
         )
       );
     };
-  }, "withLfwAltTextPanel");
-  wp.hooks.addFilter("editor.BlockEdit", "lfw-alt-text/panel", withPanel);
+  }, "withLfwAltTextCheckPanel");
+  wp.hooks.addFilter("editor.BlockEdit", "lfw-alt-text-check/panel", withPanel);
 
   // 3 and 4. The document check.
   const PrePublish =
@@ -218,7 +218,7 @@
         "ul",
         {
           key: "list",
-          className: "lfw-alt-text-list",
+          className: "lfw-alt-text-check-list",
           style: { margin: "0 0 1em", padding: 0, listStyle: "none" },
         },
         s.issues.map(function (item) {
@@ -329,7 +329,7 @@
           .filter(Boolean)
           .map(function (id) {
             const m = core.getMedia(Number(id), { context: "view" });
-            return id + ":" + (m && m.lfw_alt_text ? m.lfw_alt_text.status : "");
+            return id + ":" + (m && m.lfw_alt_text_check ? m.lfw_alt_text_check.status : "");
           })
           .join(",");
       },
@@ -441,14 +441,14 @@
       PrePublish && items.length
         ? el(
             PrePublish,
-            { title: title, initialOpen: true, className: "lfw-alt-text-prepublish" },
+            { title: title, initialOpen: true, className: "lfw-alt-text-check-prepublish" },
             el(Check, { state: state })
           )
         : null,
       DocPanel
         ? el(
             DocPanel,
-            { name: "lfw-alt-text", title: title, className: "lfw-alt-text-panel" },
+            { name: "lfw-alt-text-check", title: title, className: "lfw-alt-text-check-panel" },
             el(Check, { state: state })
           )
         : null
@@ -456,6 +456,6 @@
   }
 
   if (cfg.mode !== "off" && wp.plugins && PrePublish) {
-    wp.plugins.registerPlugin("lfw-alt-text", { render: AltTextCheck });
+    wp.plugins.registerPlugin("lfw-alt-text-check", { render: AltTextCheck });
   }
 })(window.wp);

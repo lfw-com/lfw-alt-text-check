@@ -1,4 +1,4 @@
-=== LFW Alt Text ===
+=== LFW Alt Text Check ===
 Contributors: lfw
 Tags: alt text, accessibility, images, media, wcag
 Requires at least: 6.6
@@ -26,7 +26,7 @@ This plugin makes the choice explicit. Every image needs one of these:
 
 **Overrides**: administrators (or the roles you choose) can tick "Publish anyway". Each override is recorded on the post with the user, the time and the number of images.
 
-**Tools > Alt text** reports how many library images have alt text, a reason or neither, and lists the posts that contain images needing attention. `wp lfw-alt-text audit` prints the same from the command line.
+**Tools > Alt text** reports how many library images have alt text, a reason or neither, and lists the posts that contain images needing attention. `wp lfw-alt-text-check audit` prints the same from the command line.
 
 **Settings > Alt text** sets "Block publishing", "Warn only" or "Off" for each post type, and which roles may publish anyway. By default posts and pages block publishing, other post types warn, and only administrators may override.
 
@@ -46,9 +46,9 @@ The reason note is free text that a contributor can save and an editor will late
 
 == Installation ==
 
-1. Upload the `lfw-alt-text` folder to `/wp-content/plugins/`, or install the zip from Plugins > Add New.
+1. Upload the `lfw-alt-text-check` folder to `/wp-content/plugins/`, or install the zip from Plugins > Add New.
 2. Activate it. Posts and pages now require alt text or a reason before publishing.
-3. Optional: adjust Settings > Alt text, and run `wp lfw-alt-text audit` to see what is already published.
+3. Optional: adjust Settings > Alt text, and run `wp lfw-alt-text-check audit` to see what is already published.
 
 == Frequently Asked Questions ==
 

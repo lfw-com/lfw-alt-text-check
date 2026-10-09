@@ -1,9 +1,9 @@
 /**
- * LFW Alt Text: the rule, shared by the block editor panel and the tests.
+ * LFW Alt Text Check: the rule, shared by the block editor panel and the tests.
  * An image passes when it has alt text, a recorded reason on the block, or a
  * recorded reason in the Media Library. No WordPress calls here, so it runs
  * the same in the browser and in Node. The PHP twin is
- * LFW_Alt_Text::images_in_content() and ::item_passes().
+ * LFW_Alt_Text_Check::images_in_content() and ::item_passes().
  */
 (function (root) {
   "use strict";
@@ -156,7 +156,7 @@
     return !!(s.publishPanelOpen || s.status === "publish" || s.status === "future");
   }
 
-  root.lfwAltTextRules = {
+  root.lfwAltTextCheckRules = {
     REASONS: REASONS,
     NOTE_MAX: NOTE_MAX,
     hasAlt: hasAlt,

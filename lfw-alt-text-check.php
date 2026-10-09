@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: LFW Alt Text
+ * Plugin Name: LFW Alt Text Check
  * Plugin URI:  https://lfw.com/
  * Description: An image cannot be published without alternative text or a recorded reason it has none (decorative, described in the surrounding text, or another reason with a note). Shows the status in the Media Library, lists every image that needs attention before publishing, and blocks publishing until each one is handled. Runs on your own site and makes no network calls.
  * Version:     1.0.0
@@ -9,7 +9,7 @@
  * Author:      LFW
  * Author URI:  https://lfw.com/
  * License:     GPL-2.0-or-later
- * Text Domain: lfw-alt-text
+ * Text Domain: lfw-alt-text-check
  *
  * What this does NOT do: it does not judge whether alt text is good. "Image" or
  * "IMG_2041.jpg" passes. A person still reviews what the alt text says and
@@ -37,14 +37,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class LFW_Alt_Text {
+final class LFW_Alt_Text_Check {
 
 	const VERSION       = '1.0.0';
-	const OPTION        = 'lfw_alt_text';
-	const META_REASON   = '_lfw_alt_text_reason';
-	const META_NOTE     = '_lfw_alt_text_note';
-	const META_BY       = '_lfw_alt_text_by';
-	const META_OVERRIDE = '_lfw_alt_text_overrides';
+	const OPTION        = 'lfw_alt_text_check';
+	const META_REASON   = '_lfw_alt_text_check_reason';
+	const META_NOTE     = '_lfw_alt_text_check_note';
+	const META_BY       = '_lfw_alt_text_check_by';
+	const META_OVERRIDE = '_lfw_alt_text_check_overrides';
 	const NOTE_MAX      = 200;
 	const BLOCKS        = array( 'core/image', 'core/cover', 'core/media-text' );
 
@@ -72,7 +72,7 @@ final class LFW_Alt_Text {
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			WP_CLI::add_command( 'lfw-alt-text', 'LFW_Alt_Text_CLI' );
+			WP_CLI::add_command( 'lfw-alt-text-check', 'LFW_Alt_Text_Check_CLI' );
 		}
 	}
 
@@ -83,9 +83,9 @@ final class LFW_Alt_Text {
 	/** Reasons an image may have no alt text, in plain words. */
 	public static function reasons() {
 		return array(
-			'decorative' => __( 'Decorative: it adds no information', 'lfw-alt-text' ),
-			'described'  => __( 'Described in the surrounding text', 'lfw-alt-text' ),
-			'other'      => __( 'Other reason (explain in the note)', 'lfw-alt-text' ),
+			'decorative' => __( 'Decorative: it adds no information', 'lfw-alt-text-check' ),
+			'described'  => __( 'Described in the surrounding text', 'lfw-alt-text-check' ),
+			'other'      => __( 'Other reason (explain in the note)', 'lfw-alt-text-check' ),
 		);
 	}
 
@@ -141,15 +141,15 @@ final class LFW_Alt_Text {
 
 	public static function status_label( $s ) {
 		if ( 'present' === $s['status'] ) {
-			return __( 'Present', 'lfw-alt-text' );
+			return __( 'Present', 'lfw-alt-text-check' );
 		}
 		if ( 'missing' === $s['status'] ) {
-			return __( 'Missing', 'lfw-alt-text' );
+			return __( 'Missing', 'lfw-alt-text-check' );
 		}
 		$labels = array(
-			'decorative' => __( 'None: decorative', 'lfw-alt-text' ),
-			'described'  => __( 'None: described in the surrounding text', 'lfw-alt-text' ),
-			'other'      => __( 'None: other reason', 'lfw-alt-text' ),
+			'decorative' => __( 'None: decorative', 'lfw-alt-text-check' ),
+			'described'  => __( 'None: described in the surrounding text', 'lfw-alt-text-check' ),
+			'other'      => __( 'None: other reason', 'lfw-alt-text-check' ),
 		);
 		return $labels[ $s['status'] ];
 	}
@@ -335,7 +335,7 @@ final class LFW_Alt_Text {
 
 	public static function register_settings() {
 		register_setting(
-			'lfw_alt_text',
+			'lfw_alt_text_check',
 			self::OPTION,
 			array(
 				'type'              => 'array',
@@ -365,29 +365,29 @@ final class LFW_Alt_Text {
 		$color  = 'missing' === $s['status'] ? ' style="color:#b32d2e"' : '';
 		$text   = '<strong' . $color . '>' . esc_html( self::status_label( $s ) ) . '</strong>';
 		if ( 'missing' === $s['status'] ) {
-			$text .= '<br>' . esc_html__( 'Add alternative text above, or choose a reason it has none.', 'lfw-alt-text' );
+			$text .= '<br>' . esc_html__( 'Add alternative text above, or choose a reason it has none.', 'lfw-alt-text-check' );
 		}
-		$fields['lfw_alt_text_status'] = array(
-			'label' => __( 'Alt text check', 'lfw-alt-text' ),
+		$fields['lfw_alt_text_check_status'] = array(
+			'label' => __( 'Alt text check', 'lfw-alt-text-check' ),
 			'input' => 'html',
-			'html'  => '<p id="lfw-alt-text-status-' . $id . '">' . $text . '</p>',
+			'html'  => '<p id="lfw-alt-text-check-status-' . $id . '">' . $text . '</p>',
 		);
 
-		$options = '<option value="">' . esc_html__( 'No reason: this image needs alt text', 'lfw-alt-text' ) . '</option>';
+		$options = '<option value="">' . esc_html__( 'No reason: this image needs alt text', 'lfw-alt-text-check' ) . '</option>';
 		foreach ( self::reasons() as $key => $label ) {
 			$options .= '<option value="' . esc_attr( $key ) . '"' . selected( $reason, $key, false ) . '>' . esc_html( $label ) . '</option>';
 		}
-		$fields['lfw_alt_text_reason'] = array(
-			'label' => __( 'If there is no alt text, why?', 'lfw-alt-text' ),
+		$fields['lfw_alt_text_check_reason'] = array(
+			'label' => __( 'If there is no alt text, why?', 'lfw-alt-text-check' ),
 			'input' => 'html',
-			'html'  => '<select name="attachments[' . $id . '][lfw_alt_text_reason]" id="attachments-' . $id . '-lfw_alt_text_reason" aria-describedby="lfw-alt-text-status-' . $id . '">' . $options . '</select>',
+			'html'  => '<select name="attachments[' . $id . '][lfw_alt_text_check_reason]" id="attachments-' . $id . '-lfw_alt_text_check_reason" aria-describedby="lfw-alt-text-check-status-' . $id . '">' . $options . '</select>',
 		);
-		$fields['lfw_alt_text_note']   = array(
-			'label' => __( 'Reason note', 'lfw-alt-text' ),
+		$fields['lfw_alt_text_check_note']   = array(
+			'label' => __( 'Reason note', 'lfw-alt-text-check' ),
 			'input' => 'html',
-			'html'  => '<input type="text" class="text" maxlength="' . self::NOTE_MAX . '" name="attachments[' . $id . '][lfw_alt_text_note]" id="attachments-' . $id . '-lfw_alt_text_note" value="' . esc_attr( $note ) . '">',
+			'html'  => '<input type="text" class="text" maxlength="' . self::NOTE_MAX . '" name="attachments[' . $id . '][lfw_alt_text_check_note]" id="attachments-' . $id . '-lfw_alt_text_check_note" value="' . esc_attr( $note ) . '">',
 			/* translators: %d: maximum number of characters. */
-			'helps' => sprintf( __( 'Required for "Other". Up to %d characters. Editors see this note.', 'lfw-alt-text' ), self::NOTE_MAX ),
+			'helps' => sprintf( __( 'Required for "Other". Up to %d characters. Editors see this note.', 'lfw-alt-text-check' ), self::NOTE_MAX ),
 		);
 		return $fields;
 	}
@@ -398,10 +398,10 @@ final class LFW_Alt_Text {
 	 */
 	public static function save_fields( $post, $attachment ) {
 		$id = isset( $post['ID'] ) ? (int) $post['ID'] : 0;
-		if ( ! $id || ! is_array( $attachment ) || ! array_key_exists( 'lfw_alt_text_reason', $attachment ) || ! current_user_can( 'edit_post', $id ) ) {
+		if ( ! $id || ! is_array( $attachment ) || ! array_key_exists( 'lfw_alt_text_check_reason', $attachment ) || ! current_user_can( 'edit_post', $id ) ) {
 			return $post;
 		}
-		list( $reason, $note ) = self::sanitize_reason( $attachment['lfw_alt_text_reason'], isset( $attachment['lfw_alt_text_note'] ) ? $attachment['lfw_alt_text_note'] : '' );
+		list( $reason, $note ) = self::sanitize_reason( $attachment['lfw_alt_text_check_reason'], isset( $attachment['lfw_alt_text_check_note'] ) ? $attachment['lfw_alt_text_check_note'] : '' );
 		$before                = (string) get_post_meta( $id, self::META_REASON, true ) . '|' . (string) get_post_meta( $id, self::META_NOTE, true );
 		if ( '' === $reason ) {
 			delete_post_meta( $id, self::META_REASON );
@@ -418,12 +418,12 @@ final class LFW_Alt_Text {
 	}
 
 	public static function column( $cols ) {
-		$cols['lfw_alt_text'] = __( 'Alt text', 'lfw-alt-text' );
+		$cols['lfw_alt_text_check'] = __( 'Alt text', 'lfw-alt-text-check' );
 		return $cols;
 	}
 
 	public static function column_value( $name, $id ) {
-		if ( 'lfw_alt_text' !== $name || ! self::is_image( $id ) ) {
+		if ( 'lfw_alt_text_check' !== $name || ! self::is_image( $id ) ) {
 			return;
 		}
 		$s = self::attachment_status( $id );
@@ -461,12 +461,12 @@ final class LFW_Alt_Text {
 		}
 		$v    = self::filter_value();
 		$opts = array(
-			''        => __( 'Any alt text status', 'lfw-alt-text' ),
-			'missing' => __( 'Alt text missing', 'lfw-alt-text' ),
-			'reason'  => __( 'No alt text, reason recorded', 'lfw-alt-text' ),
-			'present' => __( 'Alt text present', 'lfw-alt-text' ),
+			''        => __( 'Any alt text status', 'lfw-alt-text-check' ),
+			'missing' => __( 'Alt text missing', 'lfw-alt-text-check' ),
+			'reason'  => __( 'No alt text, reason recorded', 'lfw-alt-text-check' ),
+			'present' => __( 'Alt text present', 'lfw-alt-text-check' ),
 		);
-		echo '<label for="lfw-alt-filter" class="screen-reader-text">' . esc_html__( 'Filter by alt text', 'lfw-alt-text' ) . '</label><select name="lfw_alt" id="lfw-alt-filter">';
+		echo '<label for="lfw-alt-filter" class="screen-reader-text">' . esc_html__( 'Filter by alt text', 'lfw-alt-text-check' ) . '</label><select name="lfw_alt" id="lfw-alt-filter">';
 		foreach ( $opts as $key => $label ) {
 			echo '<option value="' . esc_attr( $key ) . '"' . selected( $v, $key, false ) . '>' . esc_html( $label ) . '</option>';
 		}
@@ -508,7 +508,7 @@ final class LFW_Alt_Text {
 	public static function rest_field() {
 		register_rest_field(
 			'attachment',
-			'lfw_alt_text',
+			'lfw_alt_text_check',
 			array(
 				'get_callback' => function ( $obj ) {
 					if ( ! current_user_can( 'edit_posts' ) || empty( $obj['id'] ) || ! self::is_image( (int) $obj['id'] ) ) {
@@ -517,7 +517,7 @@ final class LFW_Alt_Text {
 					return self::attachment_status( (int) $obj['id'] );
 				},
 				'schema'       => array(
-					'description' => __( 'Alt text status recorded by LFW Alt Text.', 'lfw-alt-text' ),
+					'description' => __( 'Alt text status recorded by LFW Alt Text Check.', 'lfw-alt-text-check' ),
 					'type'        => array( 'object', 'null' ),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -593,7 +593,7 @@ final class LFW_Alt_Text {
 	/** The message for a blocked publish. */
 	public static function blocked_message( $count ) {
 		/* translators: %d: number of images. */
-		return sprintf( _n( 'Not published: %d image has no alt text and no reason it has none. Add alt text or mark it decorative, then publish again.', 'Not published: %d images have no alt text and no reason they have none. Add alt text or mark them decorative, then publish again.', $count, 'lfw-alt-text' ), $count );
+		return sprintf( _n( 'Not published: %d image has no alt text and no reason it has none. Add alt text or mark it decorative, then publish again.', 'Not published: %d images have no alt text and no reason they have none. Add alt text or mark them decorative, then publish again.', $count, 'lfw-alt-text-check' ), $count );
 	}
 
 	/** Server-side rule for REST saves (the block editor), so the editor lock cannot be skipped. */
@@ -622,7 +622,7 @@ final class LFW_Alt_Text {
 			self::$pending_override = count( $issues );
 			return $prepared;
 		}
-		return new WP_Error( 'lfw_alt_text_missing', self::blocked_message( count( $issues ) ), array( 'status' => 400, 'images' => count( $issues ) ) );
+		return new WP_Error( 'lfw_alt_text_check_missing', self::blocked_message( count( $issues ) ), array( 'status' => 400, 'images' => count( $issues ) ) );
 	}
 
 	/**
@@ -649,11 +649,11 @@ final class LFW_Alt_Text {
 		}
 		$was = ! empty( $postarr['ID'] ) ? get_post_status( (int) $postarr['ID'] ) : '';
 		if ( in_array( $was, array( 'publish', 'future' ), true ) ) {
-			self::flash( 'warning', sprintf( /* translators: %d: number of images. */ _n( 'Saved, but %d image on this live page has no alt text and no reason it has none.', 'Saved, but %d images on this live page have no alt text and no reason they have none.', count( $issues ), 'lfw-alt-text' ), count( $issues ) ) );
+			self::flash( 'warning', sprintf( /* translators: %d: number of images. */ _n( 'Saved, but %d image on this live page has no alt text and no reason it has none.', 'Saved, but %d images on this live page have no alt text and no reason they have none.', count( $issues ), 'lfw-alt-text-check' ), count( $issues ) ) );
 			return $data;
 		}
 		$data['post_status'] = 'pending' === $was ? 'pending' : 'draft';
-		self::flash( 'error', self::blocked_message( count( $issues ) ) . ' ' . __( 'It was saved as a draft.', 'lfw-alt-text' ) );
+		self::flash( 'error', self::blocked_message( count( $issues ) ) . ' ' . __( 'It was saved as a draft.', 'lfw-alt-text-check' ) );
 		return $data;
 	}
 
@@ -674,11 +674,11 @@ final class LFW_Alt_Text {
 	}
 
 	private static function flash( $type, $message ) {
-		set_transient( 'lfw_alt_text_flash_' . get_current_user_id(), array( 'type' => $type, 'message' => $message ), 120 );
+		set_transient( 'lfw_alt_text_check_flash_' . get_current_user_id(), array( 'type' => $type, 'message' => $message ), 120 );
 	}
 
 	public static function notices() {
-		$key   = 'lfw_alt_text_flash_' . get_current_user_id();
+		$key   = 'lfw_alt_text_check_flash_' . get_current_user_id();
 		$flash = get_transient( $key );
 		if ( is_array( $flash ) ) {
 			delete_transient( $key );
@@ -696,7 +696,7 @@ final class LFW_Alt_Text {
 		$n = count( self::issues( $post->post_content ) );
 		if ( $n ) {
 			/* translators: %d: number of images. */
-			printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_html( sprintf( _n( '%d image in this content has no alt text and no reason it has none. Add alt text in the image settings, or record a reason in the Media Library.', '%d images in this content have no alt text and no reason they have none. Add alt text in the image settings, or record a reason in the Media Library.', $n, 'lfw-alt-text' ), $n ) ) );
+			printf( '<div class="notice notice-warning"><p>%s</p></div>', esc_html( sprintf( _n( '%d image in this content has no alt text and no reason it has none. Add alt text in the image settings, or record a reason in the Media Library.', '%d images in this content have no alt text and no reason they have none. Add alt text in the image settings, or record a reason in the Media Library.', $n, 'lfw-alt-text-check' ), $n ) ) );
 		}
 	}
 
@@ -710,12 +710,12 @@ final class LFW_Alt_Text {
 			return;
 		}
 		$url = plugin_dir_url( __FILE__ ) . 'assets/';
-		wp_enqueue_script( 'lfw-alt-text-rules', $url . 'rules.js', array(), self::VERSION, true );
-		wp_enqueue_script( 'lfw-alt-text-editor', $url . 'editor.js', array( 'lfw-alt-text-rules', 'wp-plugins', 'wp-editor', 'wp-element', 'wp-components', 'wp-data', 'wp-hooks', 'wp-compose', 'wp-block-editor', 'wp-i18n', 'wp-a11y', 'wp-notices', 'wp-core-data' ), self::VERSION, true );
+		wp_enqueue_script( 'lfw-alt-text-check-rules', $url . 'rules.js', array(), self::VERSION, true );
+		wp_enqueue_script( 'lfw-alt-text-check-editor', $url . 'editor.js', array( 'lfw-alt-text-check-rules', 'wp-plugins', 'wp-editor', 'wp-element', 'wp-components', 'wp-data', 'wp-hooks', 'wp-compose', 'wp-block-editor', 'wp-i18n', 'wp-a11y', 'wp-notices', 'wp-core-data' ), self::VERSION, true );
 		$type = 'post' === $screen->base ? (string) $screen->post_type : '';
 		wp_add_inline_script(
-			'lfw-alt-text-editor',
-			'window.lfwAltText = ' . wp_json_encode(
+			'lfw-alt-text-check-editor',
+			'window.lfwAltTextCheck = ' . wp_json_encode(
 				array(
 					'mode'        => $type ? self::mode_for( $type ) : 'off',
 					'canOverride' => self::can_override(),
@@ -724,7 +724,7 @@ final class LFW_Alt_Text {
 			) . ';',
 			'before'
 		);
-		wp_set_script_translations( 'lfw-alt-text-editor', 'lfw-alt-text' );
+		wp_set_script_translations( 'lfw-alt-text-check-editor', 'lfw-alt-text-check' );
 	}
 
 	/* ------------------------------------------------------------------ *
@@ -732,8 +732,8 @@ final class LFW_Alt_Text {
 	 * ------------------------------------------------------------------ */
 
 	public static function menus() {
-		add_management_page( __( 'Alt text report', 'lfw-alt-text' ), __( 'Alt text', 'lfw-alt-text' ), 'edit_others_posts', 'lfw-alt-text', array( __CLASS__, 'report_page' ) );
-		add_options_page( __( 'Alt text', 'lfw-alt-text' ), __( 'Alt text', 'lfw-alt-text' ), 'manage_options', 'lfw-alt-text-settings', array( __CLASS__, 'settings_page' ) );
+		add_management_page( __( 'Alt text report', 'lfw-alt-text-check' ), __( 'Alt text', 'lfw-alt-text-check' ), 'edit_others_posts', 'lfw-alt-text-check', array( __CLASS__, 'report_page' ) );
+		add_options_page( __( 'Alt text', 'lfw-alt-text-check' ), __( 'Alt text', 'lfw-alt-text-check' ), 'manage_options', 'lfw-alt-text-check-settings', array( __CLASS__, 'settings_page' ) );
 	}
 
 	private static function count_images( $meta_query = null ) {
@@ -822,54 +822,54 @@ final class LFW_Alt_Text {
 
 	public static function report_page() {
 		if ( ! current_user_can( 'edit_others_posts' ) ) {
-			wp_die( esc_html__( 'You do not have permission to view this report.', 'lfw-alt-text' ) );
+			wp_die( esc_html__( 'You do not have permission to view this report.', 'lfw-alt-text-check' ) );
 		}
 		$a = self::audit();
 		$c = $a['counts'];
-		echo '<div class="wrap"><h1>' . esc_html__( 'Alt text report', 'lfw-alt-text' ) . '</h1>';
-		echo '<p>' . esc_html__( 'Images without alt text and without a recorded reason, in the Media Library and in your content. This report checks that a choice was made; a person still reviews whether the alt text and reasons are right.', 'lfw-alt-text' ) . '</p>';
+		echo '<div class="wrap"><h1>' . esc_html__( 'Alt text report', 'lfw-alt-text-check' ) . '</h1>';
+		echo '<p>' . esc_html__( 'Images without alt text and without a recorded reason, in the Media Library and in your content. This report checks that a choice was made; a person still reviews whether the alt text and reasons are right.', 'lfw-alt-text-check' ) . '</p>';
 
-		echo '<h2>' . esc_html__( 'Media Library', 'lfw-alt-text' ) . '</h2><ul>';
+		echo '<h2>' . esc_html__( 'Media Library', 'lfw-alt-text-check' ) . '</h2><ul>';
 		/* translators: %d: count. */
 		$rows = array(
-			sprintf( __( '%d images in total', 'lfw-alt-text' ), $c['images'] ),
+			sprintf( __( '%d images in total', 'lfw-alt-text-check' ), $c['images'] ),
 			/* translators: %d: count. */
-			sprintf( __( '%d with alt text', 'lfw-alt-text' ), $c['present'] ),
+			sprintf( __( '%d with alt text', 'lfw-alt-text-check' ), $c['present'] ),
 			/* translators: %d: count. */
-			sprintf( __( '%d marked decorative', 'lfw-alt-text' ), $c['decorative'] ),
+			sprintf( __( '%d marked decorative', 'lfw-alt-text-check' ), $c['decorative'] ),
 			/* translators: %d: count. */
-			sprintf( __( '%d described in the surrounding text', 'lfw-alt-text' ), $c['described'] ),
+			sprintf( __( '%d described in the surrounding text', 'lfw-alt-text-check' ), $c['described'] ),
 			/* translators: %d: count. */
-			sprintf( __( '%d with another recorded reason', 'lfw-alt-text' ), $c['other'] ),
+			sprintf( __( '%d with another recorded reason', 'lfw-alt-text-check' ), $c['other'] ),
 		);
 		foreach ( $rows as $r ) {
 			echo '<li>' . esc_html( $r ) . '</li>';
 		}
 		/* translators: %d: count. */
-		echo '<li><strong>' . esc_html( sprintf( __( '%d missing alt text and a reason', 'lfw-alt-text' ), $c['missing'] ) ) . '</strong> <a href="' . esc_url( admin_url( 'upload.php?mode=list&lfw_alt=missing' ) ) . '">' . esc_html__( 'Show them in the Media Library', 'lfw-alt-text' ) . '</a></li></ul>';
+		echo '<li><strong>' . esc_html( sprintf( __( '%d missing alt text and a reason', 'lfw-alt-text-check' ), $c['missing'] ) ) . '</strong> <a href="' . esc_url( admin_url( 'upload.php?mode=list&lfw_alt=missing' ) ) . '">' . esc_html__( 'Show them in the Media Library', 'lfw-alt-text-check' ) . '</a></li></ul>';
 
 		if ( $a['missing_images'] ) {
 			/* translators: %d: count shown. */
-			echo '<h3>' . esc_html( sprintf( __( 'Newest images missing alt text (up to %d)', 'lfw-alt-text' ), 100 ) ) . '</h3><table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Image', 'lfw-alt-text' ) . '</th><th scope="col">' . esc_html__( 'Uploaded', 'lfw-alt-text' ) . '</th></tr></thead><tbody>';
+			echo '<h3>' . esc_html( sprintf( __( 'Newest images missing alt text (up to %d)', 'lfw-alt-text-check' ), 100 ) ) . '</h3><table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Image', 'lfw-alt-text-check' ) . '</th><th scope="col">' . esc_html__( 'Uploaded', 'lfw-alt-text-check' ) . '</th></tr></thead><tbody>';
 			foreach ( $a['missing_images'] as $id ) {
 				echo '<tr><td><a href="' . esc_url( get_edit_post_link( $id ) ) . '">' . esc_html( get_the_title( $id ) ? get_the_title( $id ) : basename( (string) get_attached_file( $id ) ) ) . '</a></td><td>' . esc_html( get_the_date( '', $id ) ) . '</td></tr>';
 			}
 			echo '</tbody></table>';
 		}
 
-		echo '<h2>' . esc_html__( 'Content', 'lfw-alt-text' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Content', 'lfw-alt-text-check' ) . '</h2>';
 		$found = count( $a['posts'] );
 		if ( $a['capped'] ) {
 			/* translators: 1: number of posts checked, 2: number with problems. */
-			echo '<p>' . esc_html( sprintf( __( 'Checked the %1$d most recently changed posts that contain images. At least %2$d have images without alt text or a reason. Run "wp lfw-alt-text audit --limit=0" to check everything.', 'lfw-alt-text' ), $a['checked'], $found ) ) . '</p>';
+			echo '<p>' . esc_html( sprintf( __( 'Checked the %1$d most recently changed posts that contain images. At least %2$d have images without alt text or a reason. Run "wp lfw-alt-text-check audit --limit=0" to check everything.', 'lfw-alt-text-check' ), $a['checked'], $found ) ) . '</p>';
 		} else {
 			/* translators: 1: number of posts checked, 2: number with problems. */
-			echo '<p>' . esc_html( sprintf( __( 'Checked %1$d posts that contain images. %2$d have images without alt text or a reason.', 'lfw-alt-text' ), $a['checked'], $found ) ) . '</p>';
+			echo '<p>' . esc_html( sprintf( __( 'Checked %1$d posts that contain images. %2$d have images without alt text or a reason.', 'lfw-alt-text-check' ), $a['checked'], $found ) ) . '</p>';
 		}
 		if ( $a['posts'] ) {
-			echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Title', 'lfw-alt-text' ) . '</th><th scope="col">' . esc_html__( 'Type', 'lfw-alt-text' ) . '</th><th scope="col">' . esc_html__( 'Status', 'lfw-alt-text' ) . '</th><th scope="col">' . esc_html__( 'Images needing attention', 'lfw-alt-text' ) . '</th></tr></thead><tbody>';
+			echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Title', 'lfw-alt-text-check' ) . '</th><th scope="col">' . esc_html__( 'Type', 'lfw-alt-text-check' ) . '</th><th scope="col">' . esc_html__( 'Status', 'lfw-alt-text-check' ) . '</th><th scope="col">' . esc_html__( 'Images needing attention', 'lfw-alt-text-check' ) . '</th></tr></thead><tbody>';
 			foreach ( $a['posts'] as $p ) {
-				$title = '' !== $p['title'] ? $p['title'] : __( '(no title)', 'lfw-alt-text' );
+				$title = '' !== $p['title'] ? $p['title'] : __( '(no title)', 'lfw-alt-text-check' );
 				$link  = get_edit_post_link( $p['id'] );
 				echo '<tr><td>' . ( $link ? '<a href="' . esc_url( $link ) . '">' . esc_html( $title ) . '</a>' : esc_html( $title ) ) . '</td><td>' . esc_html( $p['type'] ) . '</td><td>' . esc_html( $p['status'] ) . '</td><td>' . esc_html( (string) $p['images'] ) . '</td></tr>';
 			}
@@ -877,13 +877,13 @@ final class LFW_Alt_Text {
 		}
 
 		if ( $a['overrides'] ) {
-			echo '<h2>' . esc_html__( 'Published with an override', 'lfw-alt-text' ) . '</h2><table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Title', 'lfw-alt-text' ) . '</th><th scope="col">' . esc_html__( 'Last override', 'lfw-alt-text' ) . '</th></tr></thead><tbody>';
+			echo '<h2>' . esc_html__( 'Published with an override', 'lfw-alt-text-check' ) . '</h2><table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Title', 'lfw-alt-text-check' ) . '</th><th scope="col">' . esc_html__( 'Last override', 'lfw-alt-text-check' ) . '</th></tr></thead><tbody>';
 			foreach ( $a['overrides'] as $id ) {
 				$log  = get_post_meta( $id, self::META_OVERRIDE, true );
 				$last = is_array( $log ) && $log ? end( $log ) : null;
 				$who  = $last ? get_userdata( (int) $last['user'] ) : null;
 				$link = get_edit_post_link( $id );
-				$text = $last ? sprintf( /* translators: 1: user name, 2: date, 3: number of images. */ _n( '%1$s, %2$s, %3$d image', '%1$s, %2$s, %3$d images', (int) $last['images'], 'lfw-alt-text' ), $who ? $who->display_name : __( 'unknown user', 'lfw-alt-text' ), wp_date( get_option( 'date_format' ), (int) $last['time'] ), (int) $last['images'] ) : '';
+				$text = $last ? sprintf( /* translators: 1: user name, 2: date, 3: number of images. */ _n( '%1$s, %2$s, %3$d image', '%1$s, %2$s, %3$d images', (int) $last['images'], 'lfw-alt-text-check' ), $who ? $who->display_name : __( 'unknown user', 'lfw-alt-text-check' ), wp_date( get_option( 'date_format' ), (int) $last['time'] ), (int) $last['images'] ) : '';
 				echo '<tr><td>' . ( $link ? '<a href="' . esc_url( $link ) . '">' . esc_html( get_the_title( $id ) ) . '</a>' : esc_html( get_the_title( $id ) ) ) . '</td><td>' . esc_html( $text ) . '</td></tr>';
 			}
 			echo '</tbody></table>';
@@ -897,14 +897,14 @@ final class LFW_Alt_Text {
 		}
 		$s     = self::settings();
 		$modes = array(
-			'enforce' => __( 'Block publishing', 'lfw-alt-text' ),
-			'warn'    => __( 'Warn only', 'lfw-alt-text' ),
-			'off'     => __( 'Off', 'lfw-alt-text' ),
+			'enforce' => __( 'Block publishing', 'lfw-alt-text-check' ),
+			'warn'    => __( 'Warn only', 'lfw-alt-text-check' ),
+			'off'     => __( 'Off', 'lfw-alt-text-check' ),
 		);
-		echo '<div class="wrap"><h1>' . esc_html__( 'Alt text', 'lfw-alt-text' ) . '</h1>';
-		echo '<p>' . esc_html__( 'Every image needs alternative text or a recorded reason it has none. Choose where that is required before publishing, and who may publish anyway.', 'lfw-alt-text' ) . '</p>';
+		echo '<div class="wrap"><h1>' . esc_html__( 'Alt text', 'lfw-alt-text-check' ) . '</h1>';
+		echo '<p>' . esc_html__( 'Every image needs alternative text or a recorded reason it has none. Choose where that is required before publishing, and who may publish anyway.', 'lfw-alt-text-check' ) . '</p>';
 		echo '<form method="post" action="options.php">';
-		settings_fields( 'lfw_alt_text' );
+		settings_fields( 'lfw_alt_text_check' );
 		echo '<table class="form-table" role="presentation"><tbody>';
 		foreach ( self::post_types() as $pt => $obj ) {
 			$cur = self::mode_for( $pt );
@@ -914,11 +914,11 @@ final class LFW_Alt_Text {
 			}
 			echo '</fieldset></td></tr>';
 		}
-		echo '<tr><th scope="row">' . esc_html__( 'Who may publish anyway', 'lfw-alt-text' ) . '</th><td><fieldset><legend class="screen-reader-text">' . esc_html__( 'Who may publish anyway', 'lfw-alt-text' ) . '</legend>';
+		echo '<tr><th scope="row">' . esc_html__( 'Who may publish anyway', 'lfw-alt-text-check' ) . '</th><td><fieldset><legend class="screen-reader-text">' . esc_html__( 'Who may publish anyway', 'lfw-alt-text-check' ) . '</legend>';
 		foreach ( wp_roles()->roles as $role => $info ) {
 			echo '<label style="display:block"><input type="checkbox" name="' . esc_attr( self::OPTION ) . '[override_roles][]" value="' . esc_attr( $role ) . '"' . checked( in_array( $role, (array) $s['override_roles'], true ), true, false ) . '> ' . esc_html( translate_user_role( $info['name'] ) ) . '</label>';
 		}
-		echo '<p class="description">' . esc_html__( 'These roles see a "Publish anyway" choice. Each use is recorded on the post and listed in Tools > Alt text.', 'lfw-alt-text' ) . '</p></fieldset></td></tr>';
+		echo '<p class="description">' . esc_html__( 'These roles see a "Publish anyway" choice. Each use is recorded on the post and listed in Tools > Alt text.', 'lfw-alt-text-check' ) . '</p></fieldset></td></tr>';
 		echo '</tbody></table>';
 		submit_button();
 		echo '</form></div>';
@@ -928,7 +928,7 @@ final class LFW_Alt_Text {
 /**
  * Report images without alt text or a recorded reason.
  */
-class LFW_Alt_Text_CLI {
+class LFW_Alt_Text_Check_CLI {
 
 	/**
 	 * Count images by alt text status and list what needs attention.
@@ -951,15 +951,15 @@ class LFW_Alt_Text_CLI {
 	 * : Exit with an error when anything needs attention (for CI or cron).
 	 *
 	 * ## EXAMPLES
-	 *     wp lfw-alt-text audit
-	 *     wp lfw-alt-text audit --limit=0 --format=json
+	 *     wp lfw-alt-text-check audit
+	 *     wp lfw-alt-text-check audit --limit=0 --format=json
 	 *
 	 * @when after_wp_load
 	 */
 	public function audit( $args, $assoc ) {
 		$limit  = isset( $assoc['limit'] ) ? (int) $assoc['limit'] : 500;
 		$format = isset( $assoc['format'] ) ? $assoc['format'] : 'table';
-		$a      = LFW_Alt_Text::audit( $limit > 0 ? $limit : PHP_INT_MAX, $limit > 0 ? 100 : -1 );
+		$a      = LFW_Alt_Text_Check::audit( $limit > 0 ? $limit : PHP_INT_MAX, $limit > 0 ? 100 : -1 );
 		if ( 'json' === $format ) {
 			WP_CLI::line( wp_json_encode( $a ) );
 		} else {
@@ -990,4 +990,4 @@ class LFW_Alt_Text_CLI {
 	}
 }
 
-LFW_Alt_Text::init();
+LFW_Alt_Text_Check::init();
